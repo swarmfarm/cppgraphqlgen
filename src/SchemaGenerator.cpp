@@ -146,6 +146,12 @@ static_assert(graphql::internal::MinorVersion == )cpp"
 		}
 	}
 
+		headerFile << R"cpp(
+
+using namespace std::literals;
+
+)cpp";
+
 	if (!_loader.getEnumTypes().empty())
 	{
 		pendingSeparator.reset();
@@ -173,6 +179,30 @@ static_assert(graphql::internal::MinorVersion == )cpp"
 };
 
 )cpp";
+			firstValue = true;
+
+			headerFile << R"cpp(constexpr std::array<std::string_view, )cpp"
+					   << enumType.values.size() << R"cpp(> namesArray)cpp" << enumType.cppType
+					   << R"cpp( = {
+)cpp";
+
+			for (const auto& value : enumType.values)
+			{
+				if (!firstValue)
+				{
+					headerFile << R"cpp(,
+)cpp";
+				}
+
+				firstValue = false;
+				headerFile << R"cpp(	R"gql()cpp" << value.value << R"cpp()gql"sv)cpp";
+			}
+
+			headerFile << R"cpp(
+};
+
+)cpp";
+
 		}
 	}
 
@@ -978,6 +1008,10 @@ public:
 			<< R"cpp( { std::unique_ptr<const Concept> { std::make_unique<Model<T>>(std::move(pimpl)) } }
 	{
 	}
+
+	constexpr static std::string_view static_typename = std::string_view(
+		")cpp" <<  objectType.type << R"cpp("
+	);
 };
 )cpp";
 	}

@@ -110,8 +110,10 @@ endif()
 add_library(graphqlpeg SyntaxTree.cpp)
 add_library(cppgraphqlgen::graphqlpeg ALIAS graphqlpeg)
 target_link_libraries(graphqlpeg PUBLIC
+  taocpp::pegtl
+  PRIVATE
   graphqlcoro
-  taocpp::pegtl)
+)
 target_include_directories(graphqlpeg PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../PEGTL/include>
@@ -138,7 +140,9 @@ add_library(cppgraphqlgen::graphqlresponse ALIAS graphqlresponse)
 target_include_directories(graphqlresponse PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   $<INSTALL_INTERFACE:${GRAPHQL_INSTALL_INCLUDE_DIR}>)
-target_link_libraries(graphqlresponse PUBLIC graphqlcoro)
+# target_link_libraries(graphqlresponse PUBLIC graphqlcoro)
+target_compile_features(graphqlresponse PUBLIC cxx_std_17)
+target_compile_options(graphqlresponse PUBLIC -fcoroutines)
 
 if(GRAPHQL_NO_BASE64)
 target_compile_definitions(graphqlresponse PUBLIC GRAPHQL_NO_BASE64)
@@ -306,6 +310,7 @@ add_library(cppgraphqlgen::graphqlservice ALIAS graphqlservice)
 target_link_libraries(graphqlservice PUBLIC
   graphqlpeg
   graphqlresponse
+  graphqlcoro
   Threads::Threads)
 
 if(GRAPHQL_UPDATE_SAMPLES)
